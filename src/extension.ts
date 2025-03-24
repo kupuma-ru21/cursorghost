@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 function normalizePath(uri: vscode.Uri): string {
   if (uri.scheme === "git") {
-    // git:/path/to/file みたいな URI の path を取得
     return uri.path;
   }
   if (uri.scheme === "file") {
@@ -24,6 +23,15 @@ vscode.window.onDidChangeActiveTextEditor((editor) => {
   if (!editor) {
     return;
   }
+
+  const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+  const isDiffEditor = activeTab?.input instanceof vscode.TabInputTextDiff;
+
+  if (!isDiffEditor) {
+    console.log(`[cursorghost] 🚫 Not a diff editor, skipping`);
+    return;
+  }
+
   const key = normalizePath(editor.document.uri);
   const line = lineMap.get(key);
   if (line !== undefined) {
