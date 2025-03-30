@@ -3,7 +3,7 @@
   "displayName": "Cursorghost",
   "description": "",
   "publisher": "kupuma-ru21",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -22,7 +22,7 @@
     "pretest": "pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
-    "package": "pnpm exec vsce package --no-dependencies"
+    "package": "pnpm run compile && pnpm exec vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -34,16 +34,13 @@
     "@vscode/test-electron": "^2.4.1",
     "@vscode/vsce": "^3.3.0",
     "eslint": "^9.21.0",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@types/diff": "^7.0.2",
+    "diff": "^7.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/kupuma-ru21/vscode-extensions"
   },
-  "icon": "images/icon.webp",
-  "dependencies": {
-    "@types/diff": "^7.0.2",
-    "diff": "^7.0.0"
-  }
+  "icon": "images/icon.webp"
 }
-
