@@ -68,7 +68,10 @@ vscode.window.onDidChangeActiveTextEditor(async (editor) => {
         leftLine++;
         rightLine++;
       } else if (change.added) {
-        rightLine++;
+        for (let i = 0; i < lines.length; i++) {
+          mapRightToLeft[rightLine] = leftLine > 0 ? leftLine - 1 : 0;
+          rightLine++;
+        }
       } else if (change.removed) {
         leftLine++;
       }
@@ -166,9 +169,7 @@ function getNearestUnchangedLineAbove(
               continue;
             }
 
-            if (!isBlank) {
-              latestContextInHunk = currentLineInNew;
-            }
+            latestContextInHunk = currentLineInNew;
 
             currentLineInNew++;
           } else if (line.startsWith("-")) {
