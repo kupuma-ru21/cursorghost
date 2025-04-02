@@ -36,18 +36,36 @@ vscode.window.onDidChangeActiveTextEditor(async (editor) => {
 
   const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
   const isDiffEditor = activeTab?.input instanceof vscode.TabInputTextDiff;
+
   if (isDiffEditor) {
     const cursorLine = editor.selection.active.line;
     lineMap.set(key, cursorLine);
   }
 
+  let isRight = false;
+  if (isDiffEditor) {
+    const leftUri = activeTab.input.original;
+    const rightUri = activeTab.input.modified;
+    const editorUri = editor.document.uri;
+    isRight = editorUri.toString() === rightUri.toString();
+  }
+
   const editors = vscode.window.visibleTextEditors;
-  const [leftEditor, rightEditor] = editors;
+  const leftEditor = editors.find(
+    (e) =>
+      isDiffEditor &&
+      e.document.uri.toString() === activeTab.input.original.toString()
+  );
+  const rightEditor = editors.find(
+    (e) =>
+      isDiffEditor &&
+      e.document.uri.toString() === activeTab.input.modified.toString()
+  );
+
   if (!leftEditor || !rightEditor) {
     return;
   }
 
-  const isRight = editor === rightEditor;
   const leftText = leftEditor.document.getText();
   const rightText = rightEditor.document.getText();
 
@@ -59,19 +77,22 @@ vscode.window.onDidChangeActiveTextEditor(async (editor) => {
 
   for (const change of changes) {
     const lines = change.value.split("\n");
-    lines.pop();
+    lines.pop(); // remove last empty line caused by split("\n")
 
-    for (let i = 0; i < lines.length; i++) {
-      if (!change.added && !change.removed) {
+    if (!change.added && !change.removed) {
+      for (let i = 0; i < lines.length; i++) {
         mapRightToLeft[rightLine] = leftLine;
         mapLeftToRight[leftLine] = rightLine;
         leftLine++;
         rightLine++;
-      } else if (change.added) {
-        rightLine++;
-      } else if (change.removed) {
-        leftLine++;
       }
+    } else if (change.added) {
+      for (let i = 0; i < lines.length; i++) {
+        mapRightToLeft[rightLine] = leftLine > 0 ? leftLine - 2 : 0;
+        rightLine++;
+      }
+    } else if (change.removed) {
+      leftLine += lines.length;
     }
   }
 
@@ -166,9 +187,7 @@ function getNearestUnchangedLineAbove(
               continue;
             }
 
-            if (!isBlank) {
-              latestContextInHunk = currentLineInNew;
-            }
+            latestContextInHunk = currentLineInNew;
 
             currentLineInNew++;
           } else if (line.startsWith("-")) {
