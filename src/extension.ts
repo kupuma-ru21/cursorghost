@@ -88,7 +88,7 @@ vscode.window.onDidChangeActiveTextEditor(async (editor) => {
       }
     } else if (change.added) {
       for (let i = 0; i < lines.length; i++) {
-        mapRightToLeft[rightLine] = leftLine > 0 ? leftLine - 1 : 0;
+        mapRightToLeft[rightLine] = leftLine > 0 ? leftLine - 2 : 0;
         rightLine++;
       }
     } else if (change.removed) {
